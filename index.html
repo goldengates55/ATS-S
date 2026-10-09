@@ -78,9 +78,16 @@ button.p{background:var(--ac);color:var(--acfg);border-color:var(--ac)}
 mark{background:var(--hl);color:inherit}
 .set select{border-color:var(--ta)}
 .bar i{background:var(--ta)}
+
+.lkw{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}.lkw[hidden]{display:none}
+.lkc{max-width:520px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:24px;text-align:center}
+:root{--c6:var(--fg)}.tabs button[data-tab=tad]{--c:var(--c6)}
+#tad input,#tad select{width:100%;padding:8px 10px;margin:3px 0;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--fg);font:inherit}
 </style>
 </head>
 <body>
+<div id="lkw" class="lkw" role="dialog" aria-modal="true" aria-labelledby="lkt"><div class="lkc"><h2 id="lkt">Checking access…</h2><p id="lkm" class="m"></p><div class="row" style="justify-content:center"><button class="p" id="lkr">Check again</button></div></div></div>
+<p id="lkb" class="m" hidden style="max-width:960px;margin:8px auto 0;padding:0 16px"></p>
 <header class="hero"><div class="hw"><div><h1>ATS Resume Optimiser</h1><p>Check your resume against official job classifications and a job posting, then build a stronger one. Everything runs in your browser; nothing is uploaded.</p></div>
 <div class="key" aria-label="How to read the highlights"><b>Reading the highlights</b><span><mark class="hk g">Python</mark> found in your resume</span><span><mark class="hk y">ML</mark> matched through a synonym</span><span><mark class="hk r">Kubernetes</mark> missing</span></div></div></header>
 <main>
@@ -158,6 +165,25 @@ mark{background:var(--hl);color:inherit}
 <div class="row"><label class="fbtn" style="margin:0;font-weight:400">Load register (CSV or Excel)<input type="file" id="jbf" accept=".csv,.xlsx,text/csv"></label><span class="m" id="jbst" role="status"></span></div>
 <div class="g2"><input id="jbs" placeholder="Search employer, town or occupation code"><button id="jbm">Use my matched code</button></div>
 <div id="jbr"></div>
+</section>
+<section id="tad" hidden>
+<h2>Admin</h2>
+<p class="m">Only the owner of this page sees this tab. The lock screen is a soft lock: it keeps honest users out, but the page's code is visible to anyone who can open it, and time is read from the user's device clock. For real access control, also remove people in the page's sharing settings.</p>
+<div id="adgate" class="card" hidden><h3>Admin lock</h3><p class="m">Enter your admin PIN to open the lock controls.</p><div class="g2"><input id="adpin0" type="password" placeholder="Admin PIN"><button class="p" id="adgo">Unlock admin</button></div><p class="m" id="adgn"></p></div>
+<div id="adp">
+<div class="card"><h3>What users see now</h3><p class="m" id="adst"></p></div>
+<div class="card"><h3>User lock for everyone</h3><p class="m">Applies to every user who has no personal setting below. Choose a start and end date, or just a number of days from today. When the period ends, access stays locked until you reopen it.</p>
+<select id="admode" aria-label="Mode"><option value="open">Open: no lock</option><option value="period">Time range, then locked</option><option value="locked">Locked now</option></select>
+<div class="g2"><label for="adfrom" style="font-weight:400">Start date (optional)</label><input id="adfrom" type="date"><label for="adto" style="font-weight:400">End date (optional)</label><input id="adto" type="date"><label for="addays" style="font-weight:400">Or days of access from today</label><input id="addays" type="number" min="1" value="30"></div>
+<input id="admsg" placeholder="Message shown to locked users (for example how to contact you)">
+<div class="row"><button class="p" id="adsave">Save</button><button id="adlock">Lock all users now</button><button id="adopen">Reopen for the same number of days</button><button id="adfree">Reopen with no limit</button></div><p class="m" id="adnote" role="status"></p></div>
+<div class="card"><h3>Add users and set their time range</h3><p class="m">Search for a person by name or email, select them, set their own start and end dates, then add them. A personal range overrides the lock for everyone.</p>
+<input id="adsrch" placeholder="Search a person by name or email"><div id="adres"></div><p class="m" id="adsel">No one selected.</p>
+<div class="g2"><label for="adufrom" style="font-weight:400">Start date (optional)</label><input id="adufrom" type="date"><label for="adutill" style="font-weight:400">End date</label><input id="adutill" type="date"><label for="adudays" style="font-weight:400">Or days of access from the start</label><input id="adudays" type="number" min="1" value="30"></div>
+<div class="row"><button class="p" id="adadd">Add user with this range</button></div><h3 style="margin-top:14px">Users with personal settings</h3><div id="adlist"></div></div>
+<div class="card"><h3>Admin lock</h3><p class="m">An optional PIN that must be entered each time before these controls open, so someone using your signed-in browser cannot change the lock.</p>
+<div class="g2"><input id="adpin" type="password" placeholder="New admin PIN (4 or more characters)"><div class="row"><button id="adpinset">Set PIN</button><button id="adpinclr">Remove PIN</button></div></div><p class="m" id="adpinst"></p></div>
+</div>
 </section>
 <section id="trw" hidden>
 <h2>Release watch</h2>
@@ -548,9 +574,9 @@ $("out").addEventListener("click",e=>{const b=e.target.closest("[data-mr]");if(!
  const ta=c.querySelector("[data-k=b]"),L=ta.value.split("\n"),o=b.dataset.old||"",i=o?L.findIndex(l=>l.trim()===o):-1;
  if(i>=0)L[i]=b.dataset.new;else L.push(b.dataset.new);ta.value=L.filter(l=>l.trim()).join("\n");pv();b.textContent="Added to builder ✓";b.disabled=true;$("bst").textContent="Added. Replace the [brackets] with your real numbers in the Resume builder before downloading."});
 const again=()=>{try{if(!$("tjb").hidden)jbRender()}catch(_){}pv();if($("res").value.trim()&&$("out").innerHTML)run()};
-$("rg").onchange=()=>{const r=RGC();$("rgn").textContent=RG[r].tip+" These are general norms; follow the employer's instructions.";$("bco").checked=r==="it"||r==="pt";$("bl").placeholder=RG[r].place;$("os").value={ca:"noc",it:"esco",pt:"esco",be:"esco",uk:"soc",au:"osca",nz:"nol",us:"onet"}[r];setOcc();again()};
+$("rg").onchange=()=>{const r=RGC();$("rgn").textContent=RG[r].tip+" These are general norms; follow the employer's instructions.";$("bco").checked=r==="it"||r==="pt";$("bl").placeholder=uiTr(RG[r].place);$("os").value={ca:"noc",it:"esco",pt:"esco",be:"esco",uk:"soc",au:"osca",nz:"nol",us:"onet"}[r];setOcc();again()};
 $("lg").onchange=again;$("rg").onchange();
-function tab(id){["tscan","bld","tcl","trw","tjb"].forEach(t=>{$(t).hidden=t!==id});document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===id));if(document.documentElement)document.documentElement.style.setProperty("--ta","var(--c"+({tscan:1,bld:2,tcl:3,tjb:4,trw:5})[id]+")");window.scrollTo(0,0);if(id==="tcl"&&!$("clt").value&&(LAST||$("bn").value.trim()))genLetter();if(id==="trw")rwRender();if(id==="tjb"){jbFill(false);jbRender()}}
+function tab(id){["tscan","bld","tcl","trw","tjb","tad"].forEach(t=>{$(t).hidden=t!==id});document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===id));if(document.documentElement)document.documentElement.style.setProperty("--ta","var(--c"+({tscan:1,bld:2,tcl:3,tjb:4,trw:5,tad:6})[id]+")");window.scrollTo(0,0);if(id==="tcl"&&!$("clt").value&&(LAST||$("bn").value.trim()))genLetter();if(id==="trw")rwRender();if(id==="tjb"){jbFill(false);jbRender()}}
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 $("out").addEventListener("click",e=>{const g=e.target.closest("[data-goto]");if(!g)return;tab("bld");if(bdEmpty())fromLast();const f=$(g.dataset.goto);f.scrollIntoView({behavior:"smooth",block:"center"});f.focus()});
 $("bj").innerHTML=jobT();$("bd").innerHTML=eduT("");pv();
@@ -999,7 +1025,7 @@ const FRX=[
 [/^Experience: the posting asks for (\d+)\+ years; your dated roles add up to about (\d+)\.$/,"Expérience : l'offre demande plus de $1 ans; vos postes datés totalisent environ $2 ans."],[/^Education: the posting mentions (.+) level; your highest detected is (.+)\.$/,"Formation : l'offre mentionne le niveau $1; votre niveau le plus élevé détecté est $2."],
 [/^(.+) of the posting's top keywords appear in your resume\.$/,"$1 des principaux mots-clés de l'offre figurent dans votre CV."],[/^of the posting's top keywords appear in your resume\.$/,"des principaux mots-clés de l'offre figurent dans votre CV."],[/^(\d+) matching rows.*$/,"$1 lignes correspondantes."],[/^Saved at (.+)\.$/,"Enregistré à $1."]
 ];
-const FRD=new Map([...FRL,...FRD2,["Needs your review","À vérifier de votre part"],["No match","Aucune correspondance"],["Suggested","Suggestion"]]);
+const FRD=new Map([...FRL,...FRD2,["City, State","Ville, État"],["City, County or postcode area","Ville, comté ou région du code postal"],["Suburb, State","Banlieue, État"],["Suburb, City","Banlieue, ville"],["City, District","Ville, district"],["Needs your review","À vérifier de votre part"],["No match","Aucune correspondance"],["Suggested","Suggestion"]]);
 Object.keys(SOFTF).forEach(k=>FRD.set(k.charAt(0).toUpperCase()+k.slice(1),SOFTF[k][0]));
 Object.values(GD).forEach(g=>{["$","£","€"].forEach(c=>{const f=x=>x.replace(/¤/g,c);FRD.set(f(g.en[0]),f(g.fr[0]));FRD.set(f(g.en[4]),f(g.fr[4]));FRD.set(`Low: ${f(g.en[1])} · Average: ${f(g.en[2])} · High: ${f(g.en[3])}`,`Faible : ${f(g.fr[1])} · Moyen : ${f(g.fr[2])} · Élevé : ${f(g.fr[3])}`)})});
 let UI="en";const ORIG=new WeakMap(),OATT=new WeakMap(),SKIP=/^(SCRIPT|STYLE|PRE|TEXTAREA|CODE)$/;
@@ -1019,9 +1045,142 @@ function setUI(v,save){UI=v==="fr"?"fr":"en";if($("ui"))$("ui").value=UI;if(save
  if(UI==="fr"){i18nWalk(document.body,false);document.title=tr(document.title);
   if(!UIOBS&&typeof MutationObserver!=="undefined"){UIOBS=new MutationObserver(ms=>{if(UI!=="fr")return;ms.forEach(m=>m.addedNodes.forEach(n=>i18nWalk(n,false)))});UIOBS.observe(document.body,{childList:true,subtree:true})}}
  else{i18nWalk(document.body,true);document.title="ATS Resume Optimiser";if($("res").value.trim()&&$("out").innerHTML)run();rwRender();if(!$("tjb").hidden)jbRender()}}
+/* French interface (stage 2): remaining sentences */
+((P)=>P.forEach(([a,b])=>FRD.set(a,b)))([
+["No email address detected","Aucune adresse courriel détectée"],["No education entry was detected.","Aucune formation n'a été détectée."],["No education credentials detected.","Aucun titre de formation détecté."],
+["No experience entries were detected. Check the section heading.","Aucune expérience détectée. Vérifiez le titre de la section."],["No experience entries detected. Check that the section is headed \"Experience\" or \"Work Experience\".","Aucune expérience détectée. Vérifiez que la section s'intitule « Expérience » ou « Expérience professionnelle »."],
+["Recruiters and application forms need a working email near the top.","Les recruteurs et les formulaires de candidature exigent un courriel valide en haut de la page."],["Location helps with local matching and work-authorization screening.","Le lieu aide à l'appariement local et à la vérification de l'autorisation de travail."],
+["Two or three lines at the top help both ATS keyword matching and recruiters.","Deux ou trois lignes en haut aident à la fois la correspondance des mots-clés par les ATS et les recruteurs."],["Matching is heuristic: read each line yourself, and only add terms that are true for you.","La correspondance est approximative : lisez chaque ligne vous-même et n'ajoutez que les termes qui sont vrais pour vous."],
+["Synonyms count as matches (for example ML for machine learning). Scores are a guide, not an official ATS result.","Les synonymes comptent comme des correspondances (par exemple ML pour apprentissage automatique). Les scores sont un guide, pas un résultat officiel d'ATS."],
+["Tap a keyword to select it. Only add skills you actually have, or work them into a bullet that shows how you used them.","Touchez un mot-clé pour le sélectionner. N'ajoutez que des compétences que vous avez vraiment, ou intégrez-les dans une puce qui montre comment vous les avez utilisées."],
+["Recruiters believe a soft skill when a bullet proves it. Add a line only if it is true for you, and replace every [bracket] with a real detail. The button adds the line to your most recent role in the builder.","Les recruteurs croient à une compétence interpersonnelle quand une puce la prouve. N'ajoutez une ligne que si elle est vraie pour vous, et remplacez chaque [crochet] par un vrai détail. Le bouton ajoute la ligne à votre poste le plus récent dans le créateur."],
+["Duties in the posting that your resume does not reflect yet, turned into resume bullets. Add only work you really did, then fill in the [bracket] with a real detail. The buttons add the line to your most recent role.","Des tâches de l'offre que votre CV ne reflète pas encore, transformées en puces de CV. N'ajoutez que du travail que vous avez vraiment fait, puis remplacez le [crochet] par un vrai détail. Les boutons ajoutent la ligne à votre poste le plus récent."],
+["No more duty phrases found. You can still add any phrase below.","Plus aucune phrase de tâche trouvée. Vous pouvez quand même ajouter n'importe quelle phrase ci-dessous."],["Add your details in the Resume builder first, or analyze a resume on the Scan tab.","Ajoutez d'abord vos données dans le créateur de CV, ou analysez un CV dans l'onglet Analyse."],
+["Couldn't read that file. Try pasting the text instead.","Impossible de lire ce fichier. Essayez de coller le texte."],["No text found. A scanned PDF needs OCR first.","Aucun texte trouvé. Un PDF numérisé doit d'abord passer par la reconnaissance de texte (ROC)."],["Imported and checked below.","Importé et vérifié ci-dessous."],["Already in the builder ✓","Déjà dans le créateur ✓"],["Added to builder ✓","Ajouté au créateur ✓"],
+["One bullet per line","Une puce par ligne"],["Credential, institution (year)","Titre, établissement (année)"],["Name","Nom"],["Work experience","Expérience de travail"],["Skills section","Section Compétences"],["City and province","Ville et province"],["Personal details","Renseignements personnels"],["Data-processing consent line","Mention de consentement au traitement des données"],
+["Every role needs start and end dates (month and year).","Chaque poste a besoin de dates de début et de fin (mois et année)."],["Name the school or college.","Indiquez l'école ou le collège."],["Add the year, or mark it as expected if in progress.","Ajoutez l'année, ou indiquez-la comme prévue si la formation est en cours."],
+["No numbers found in any bullet. Add scale, time saved, or outcomes you can back up.","Aucun chiffre trouvé dans les puces. Ajoutez l'ampleur, le temps économisé ou des résultats que vous pouvez appuyer."],["Consider a short line explaining it (study, caregiving, travel, contract work).","Envisagez une courte ligne pour l'expliquer (études, soins à un proche, voyage, contrats)."],
+["ATS keyword matching leans heavily on a clear Skills section.","La correspondance des mots-clés par les ATS repose beaucoup sur une section Compétences claire."],["The first line should be your full name.","La première ligne devrait être votre nom complet."],["Add each language with a CEFR level (A1 to C2) or a plain description.","Ajoutez chaque langue avec un niveau du CECR (A1 à C2) ou une description simple."],
+["Possible table/column layout: many ATS parsers scramble these","Mise en page possible en tableau ou en colonnes : beaucoup d'ATS les brouillent"],["Very long resume: consider trimming to the most relevant roles","CV très long : envisagez de le réduire aux postes les plus pertinents"],["Use the posting's title near your name or in a role title, only if it honestly describes you.","Utilisez le titre de l'offre près de votre nom ou dans un titre de poste, seulement s'il vous décrit honnêtement."],
+["Find a job (GOV.UK, DWP)","Find a job (GOV.UK, DWP)"],["Job Bank (Government of Canada)","Guichet-Emplois (gouvernement du Canada)"],["Job Bank: employers recruiting temporary foreign workers","Guichet-Emplois : employeurs qui recrutent des travailleurs étrangers temporaires"],["Positive LMIA employers list (Open Government Portal)","Liste des employeurs ayant reçu une EIMT positive (Portail du gouvernement ouvert)"],
+["USAJOBS (federal government jobs)","USAJOBS (emplois du gouvernement fédéral)"],["CareerOneStop (U.S. Department of Labor)","CareerOneStop (département du Travail des États-Unis)"],["Department of Labor foreign labor certification data","Données du département du Travail sur la certification de main-d'œuvre étrangère"],["Register of licensed sponsors: workers (Home Office)","Registre des parrains agréés : travailleurs (Home Office)"],
+["Skill occupation lists (Department of Home Affairs)","Listes de professions spécialisées (Department of Home Affairs)"],["Government jobs (jobs.govt.nz)","Emplois gouvernementaux (jobs.govt.nz)"],["Accredited employer list (Immigration New Zealand)","Liste des employeurs accrédités (Immigration New Zealand)"],["IEFP, the public employment service","IEFP, le service public de l'emploi"],["BEP, public sector jobs","BEP, emplois du secteur public"],
+["EURES, the European job mobility portal","EURES, le portail européen de la mobilité de l'emploi"],["Authorised temporary employment agencies (IEFP)","Agences de travail temporaire autorisées (IEFP)"],["Actiris (Brussels)","Actiris (Bruxelles)"],["VDAB (Flanders)","VDAB (Flandre)"],["Le Forem (Wallonia)","Le Forem (Wallonie)"],
+["Canada's official job board. Postings can show the NOC code.","Le babillard d'emplois officiel du Canada. Les offres peuvent indiquer le code CNP."],["Jobs from employers that have requested or received a Labour Market Impact Assessment (LMIA).","Emplois d'employeurs qui ont demandé ou reçu une étude d'impact sur le marché du travail (EIMT)."],
+["Quarterly CSV files of employers issued a positive LMIA, by business location and occupation. Personal names are excluded, so the list is not complete. Load a file below.","Fichiers CSV trimestriels des employeurs ayant reçu une EIMT positive, par lieu d'affaires et profession. Les noms de personnes sont exclus, donc la liste n'est pas complète. Chargez un fichier ci-dessous."],
+["The official federal job board.","Le babillard d'emplois fédéral officiel."],["Job finder, occupation profiles and local workforce centers.","Recherche d'emplois, profils de professions et centres locaux de main-d'œuvre."],["Employers with H-1B petitions, by year. It can be downloaded and loaded below.","Employeurs ayant déposé des demandes H-1B, par année. Il peut être téléchargé puis chargé ci-dessous."],
+["Disclosure files with employer, job title, SOC code and wage for labor condition applications. Load a file below.","Fichiers de divulgation avec l'employeur, le titre du poste, le code SOC et le salaire pour les demandes de conditions de travail. Chargez un fichier ci-dessous."],["The official UK government job search.","La recherche d'emploi officielle du gouvernement britannique."],
+["Organisations licensed to sponsor Skilled Worker and other worker visas, with town, county, rating and route. A CSV of about 10 MB. Load it below.","Organisations autorisées à parrainer des visas de travailleur qualifié et d'autres visas de travail, avec ville, comté, cote et filière. Un CSV d'environ 10 Mo. Chargez-le ci-dessous."],
+["The Australian Government's job search and employment service.","Le service de recherche d'emploi du gouvernement australien."],["Check whether your occupation can be sponsored. Australia has no live public search of approved sponsors; lists have only been released occasionally, for example under Freedom of Information requests. Treat any list as a dated snapshot and confirm with the employer.","Vérifiez si votre profession peut être parrainée. L'Australie n'a pas de recherche publique en direct des parrains approuvés; des listes n'ont été publiées qu'occasionnellement, par exemple à la suite de demandes d'accès à l'information. Considérez toute liste comme un instantané daté et confirmez auprès de l'employeur."],
+["Jobs in the New Zealand public service.","Emplois dans la fonction publique néo-zélandaise."],["Job listings and employment support.","Offres d'emploi et soutien à l'emploi."],["An official search tool, updated daily. Search by company name (at least 3 characters) or NZBN. Some employers choose not to be published. There is no full download to load here.","Un outil de recherche officiel, mis à jour chaque jour. Cherchez par nom d'entreprise (au moins 3 caractères) ou par NZBN. Certains employeurs choisissent de ne pas être publiés. Il n'y a pas de téléchargement complet à charger ici."],
+["Vacancies from public employment services across Europe, including Italy. EURES does not allow scraping of its vacancy data.","Postes vacants des services publics de l'emploi de toute l'Europe, dont l'Italie. EURES n'autorise pas l'extraction de ses données sur les postes vacants."],["Portugal's Institute for Employment and Vocational Training.","L'Institut de l'emploi et de la formation professionnelle du Portugal."],["The IEFP job portal.","Le portail d'emploi de l'IEFP."],
+["Public sector job openings.","Postes ouverts dans le secteur public."],["Vacancies across Europe, including Portugal.","Postes vacants dans toute l'Europe, dont le Portugal."],["Vacancies across Europe, including Belgium.","Postes vacants dans toute l'Europe, dont la Belgique."],["The IEFP list of agencies authorised to carry out temporary work activity in Portugal.","La liste de l'IEFP des agences autorisées à exercer une activité de travail temporaire au Portugal."],
+["The Brussels public employment service.","Le service public de l'emploi de Bruxelles."],["The Flemish public employment service.","Le service public de l'emploi flamand."],["The Walloon public employment service.","Le service public de l'emploi wallon."]
+]);
+((T,S)=>Object.keys(T).forEach(r=>FRD.set(RG[r].tip+" These are general norms; follow the employer's instructions.",T[r]+S)))({
+ca:"Canada : un CV de 1 à 2 pages sur papier Lettre. N'indiquez ni photo, ni date de naissance, ni état civil. Les niveaux d'anglais et de français sont appréciés.",
+us:"États-Unis : un CV d'une page est courant (2 pages pour les postes de cadre). N'indiquez ni photo, ni date de naissance, ni état civil.",
+uk:"Royaume-Uni : un CV d'au plus 2 pages sur papier A4. Ni photo, ni date de naissance, ni état civil. L'orthographe est généralement britannique.",
+au:"Australie : un CV de 2 à 3 pages sur papier A4. Ni photo ni date de naissance. Mentionnez votre droit de travailler (citoyen, résident permanent ou visa) s'il y a lieu.",
+nz:"Nouvelle-Zélande : un CV de 2 à 3 pages sur papier A4. Ni photo, ni date de naissance, ni état civil. Mentionnez votre droit de travailler (citoyen, résident ou visa) s'il y a lieu.",
+it:"Italie : CV au format A4, souvent de style Europass. Les renseignements personnels (date de naissance, nationalité) sont courants, et une mention de consentement RGPD est attendue à la fin. La photo est facultative.",
+pt:"Portugal : CV au format A4, souvent de style Europass. Les renseignements personnels sont courants et une mention de consentement au traitement des données est habituelle. La photo est facultative.",
+be:"Belgique : CV au format A4, souvent de style Europass, de 1 à 2 pages. Rédigez-le dans la langue de l'offre (cet outil prend en charge l'anglais et le français) et indiquez un niveau du CECR pour chaque langue. La photo est facultative."}," Ce sont des normes générales; suivez les consignes de l'employeur.");
+((M)=>Object.keys(M).forEach(id=>{const r=REL.find(x=>x.id===id);FRD.set(r.n,M[id][0]);FRD.set(r.v,M[id][1]);FRD.set(r.note,M[id][2])}))({
+noc:["NOC et CNP (Canada)","NOC 2021 version 1.0, anglais et français","Statistique Canada prépare la CNP 2026. Les programmes d'immigration continuent d'utiliser la CNP 2021 tant qu'ils n'annoncent pas autre chose."],
+soc:["SOC 2020 (Royaume-Uni)","SOC 2020, index de codage version 14 (août 2026)","L'ONS met à jour l'index de codage par versions, et une consultation sur la révision de la SOC est en cours."],
+osca:["OSCA (Australie)","OSCA 2024 version 1.0, avec les mises à jour du 28 juillet 2025","L'ABS prévoit la prochaine OSCA pour mars 2027."],
+nol:["NOL (Nouvelle-Zélande)","NOL V3.0.0, données provisoires","Construite à partir des tableaux de changements. Chargez la liste officielle complète de Stats NZ quand vous l'aurez."],
+onet:["O*NET-SOC (États-Unis)","O*NET 31.0 (août 2026)","O*NET a prévu sa prochaine mise à jour de base de données pour novembre 2026."],
+esco:["ESCO (Italie, Portugal, Belgique)","ESCO v1.2.1, anglais et français","Consultez la page de téléchargement d'ESCO pour les versions plus récentes."]});
+FRX.unshift(
+[/^Last checked (.+?)\. (.*)$/,(m,d,n)=>"Dernière vérification : "+d+". "+(FRD.get(n)||n)],
+[/^Expected (.+?)(: it may already be out)?\. (.*)$/,(m,d,o,n)=>"Attendue : "+d+(o?" : elle est peut-être déjà parue":"")+". "+(FRD.get(n)||n)],
+[/^Not checked for (\d+) days\. (.*)$/,(m,d,n)=>"Non vérifié depuis "+d+" jours. "+(FRD.get(n)||n)],
+[/^No standard "(.+)" heading or content detected$/,(m,s)=>"Aucun titre ou contenu standard « "+({Experience:"Expérience",Education:"Formation",Skills:"Compétences"}[s]||s)+" » détecté"],
+[/^The posting asks for (\d+)\+ years; your dated roles add up to about (\d+)\.$/,"L'offre demande plus de $1 ans; vos postes datés totalisent environ $2 ans."],
+[/^The posting mentions (.+?); (?:none detected on your resume|no credential was detected on your resume)\.$/,"L'offre mentionne $1; aucun titre n'a été détecté dans votre CV."],
+[/^The posting mentions (.+?); your highest detected is (.+)\.$/,"L'offre mentionne $1; votre niveau le plus élevé détecté est $2."],
+[/^Education: the posting mentions (.+?) level; no credential was detected on your resume\.$/,"Formation : l'offre mentionne le niveau $1; aucun titre n'a été détecté dans votre CV."],
+[/^of the posting's requirement lines are covered \((\d+) met, (\d+) partial, (\d+) missing\)\.$/,"des lignes d'exigences de l'offre sont couvertes ($1 satisfaites, $2 partielles, $3 manquantes)."],
+[/^Taken from the official (.+?) data \((.+),$/,"D'après les données officielles $1 ($2,"],[/^\) for the code matched to each role\. Overall coverage:$/,") pour le code associé à chaque poste. Couverture globale :"],
+[/^\. Add an item only if you really did that work; if most items don't fit your job, the occupation match may be wrong\. This is a guide, not an official score\.$/,". N'ajoutez un élément que si vous avez vraiment fait ce travail; si la plupart ne correspondent pas à votre poste, l'association à la profession est peut-être erronée. C'est un guide, pas une note officielle."],
+[/^(\w+): the posting best matches (.+) \((\w+) confidence, based on its first line as the title\)\. (?:Your role "(.+)" maps to the same code\.|None of your roles has this code as its top match; check the posting's real duties\.)$/,(m,s,t,c,r)=>s+" : l'offre correspond le mieux à "+t+" (confiance "+({high:"élevée",review:"moyenne",low:"faible"}[c]||c)+", selon sa première ligne comme titre). "+(r?"Votre poste « "+r+" » correspond au même code.":"Aucun de vos postes n'a ce code comme meilleure correspondance; vérifiez les vraies tâches de l'offre.")]);
+FRD.set(GN.en,GN.fr);FRD.set("O*NET-SOC (United States).","O*NET-SOC (États-Unis).");
+function uiTr(s){try{return UI==="fr"?tr(s):s}catch(_){return s}}
+
 (function uiInit(){let p=null;try{p=localStorage.getItem("ats-ui")}catch(_){}
  if(!p)p=(navigator.language||"").toLowerCase().startsWith("fr")?"fr":"en";
  $("ui").onchange=()=>setUI($("ui").value,true);if(p==="fr")setUI("fr",false)})();
+
+
+/* user lock and admin lock (soft lock: see notes in the Admin tab) */
+const LOCKON=true;
+const LK={admin:false,cfg:null,ov:null,ovs:[],ready:false,fail:false,db:null,user:null,id:null,pin:null,pinOK:true,got:0,need:1,names:{}};
+const LKT0=(typeof performance!=="undefined"?performance.now():0);
+function lkNow(){let n=Date.now();try{const h=+localStorage.getItem("ats-clk")||0;if(h-n>3e5)n=h+((typeof performance!=="undefined"?performance.now():0)-LKT0);if(n>h)localStorage.setItem("ats-clk",String(Math.floor(n)))}catch(_){}return n}
+function lkEval(){if(!LOCKON||LK.admin)return{ok:true};const r=LK.ov||LK.cfg;if(!r||r.mode==="open")return{ok:true};if(r.mode==="locked")return{ok:false,why:"locked"};
+ if(r.mode==="period"){const u=Date.parse(r.until),f=Date.parse(r.from),n=lkNow();if(!Number.isFinite(u))return{ok:false,why:"locked"};if(Number.isFinite(f)&&n<f)return{ok:false,why:"notyet",from:f};return n<=u?{ok:true,until:u}:{ok:false,why:"expired",until:u}}return{ok:false,why:"locked"}}
+function lkApply(){const w=$("lkw");if(!w)return;let show=false,t="",m="";const e=lkEval();
+ if(!LOCKON)show=false;else if(!LK.ready){show=true;t="Checking access…"}
+ else if(LK.fail){show=true;t="Access check unavailable";m="Open this page from its shared link in Claude and sign in. If you already did, press Check again."}
+ else if(!e.ok){show=true;t=e.why==="notyet"?"Your access has not started yet":e.why==="expired"?"Your access period has ended":"Access is locked";const am=(LK.ov&&LK.ov.message)||(LK.cfg&&LK.cfg.message)||"";m=(e.why==="notyet"?"Your access starts on "+lkDate(e.from)+". ":"")+(am||(e.why==="notyet"?"":"Please contact the administrator to reopen your access."))}
+ w.hidden=!show;if(show){$("lkt").textContent=t;$("lkm").textContent=m}
+ [document.querySelector&&document.querySelector("main"),document.querySelector&&document.querySelector(".hero")].forEach(x=>{if(x){x.inert=show;x.style.visibility=show?"hidden":""}});
+ const b=$("lkb");if(b){if(!show&&e.until){const d=Math.max(0,Math.ceil((e.until-lkNow())/864e5));b.hidden=false;b.textContent="Access ends on "+new Date(e.until).toLocaleDateString("en-CA",{year:"numeric",month:"short",day:"numeric"})+" ("+d+" day"+(d===1?"":"s")+" left)."}else b.hidden=true}}
+async function lkRefresh(){try{if(LK.db&&!LK.admin){const c=await LK.db.doc("lockcfg/main").get();LK.cfg=c.exists?c.data():null;if(LK.id){const o=await LK.db.doc("lockusers/"+LK.id).get();LK.ov=o.exists?o.data():null}LK.fail=false;LK.ready=true}}catch(_){}lkApply()}
+const lkSha=async s=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,"0")).join("");
+const lkIso=d=>new Date(d).toISOString(),lkDate=t=>new Date(t).toLocaleDateString("en-CA",{year:"numeric",month:"short",day:"numeric"});
+async function lkWho(){if(!LK.user||!LK.ovs.length)return;const ps=await LK.user.profiles(LK.ovs.map(o=>o.id));LK.ovs.forEach(o=>{LK.names[o.id]=(ps[o.id]&&ps[o.id].name)||"Someone"})}
+function lkDesc(r){if(!r||r.mode==="open")return"Open, no lock";if(r.mode==="locked")return"Locked";const u=Date.parse(r.until),f=Date.parse(r.from);if(!Number.isFinite(u))return"Locked";const n=lkNow(),rng=(Number.isFinite(f)?lkDate(f)+" to ":"until ")+lkDate(u);
+ if(Number.isFinite(f)&&n<f)return"Access "+rng+" (starts in "+Math.ceil((f-n)/864e5)+" days), then locked";const d=Math.ceil((u-n)/864e5);return d>=0?"Open "+rng+" ("+d+" day"+(d===1?"":"s")+" left), then locked":"Period ended "+lkDate(u)+": locked"}
+const lkLocal=t=>{const x=new Date(t);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
+function lkRange(f,t,d){const n=lkNow(),a=f?new Date(f+"T00:00:00").getTime():n,b=t?new Date(t+"T23:59:59").getTime():a+Math.max(1,+d||30)*864e5;return b>a?{from:lkIso(a),until:lkIso(b)}:null}
+async function adminRender(){await lkWho();const gate=LK.pin&&!LK.pinOK;$("adgate").hidden=!gate;$("adp").hidden=gate;if(gate)return;
+ $("adst").textContent="Everyone without a personal setting: "+lkDesc(LK.cfg);
+ if(LK.cfg){$("admode").value=LK.cfg.mode||"open";$("admsg").value=LK.cfg.message||"";if(LK.cfg.days)$("addays").value=LK.cfg.days}
+ const L=$("adlist");L.textContent="";
+ LK.ovs.forEach(o=>{const row=document.createElement("div");row.className="cand";const s=document.createElement("span");const b=document.createElement("b");b.textContent=LK.names[o.id]||"Someone";s.appendChild(b);const m=document.createElement("span");m.className="m";m.textContent=" · "+lkDesc(o);s.appendChild(m);row.appendChild(s);
+  [["Extend","ext"],["Edit range","edit"],["Open","open"],["Lock","lock"],["Remove","rm"]].forEach(([n,k])=>{const x=document.createElement("button");x.textContent=n;x.onclick=()=>adUser(o.id,k);row.appendChild(x)});L.appendChild(row)});
+ $("adpinst").textContent=LK.pin?"An admin PIN is set.":"No admin PIN is set."}
+async function adSetCfg(mode,days,reopen){const db=LK.db,n=$("adnote");try{let r={from:null,until:null};if(mode==="period"){r=reopen?lkRange("","",days):lkRange($("adfrom").value,$("adto").value,days||$("addays").value);if(!r){n.textContent="The end date must be after the start date.";return}}
+ await db.doc("lockcfg/main").set({mode,from:r.from,until:r.until,days:Math.max(1,+days||+$("addays").value||30),message:$("admsg").value.trim(),updatedAt:lkIso(lkNow())});n.textContent="Saved. Users see the change within about 30 seconds."}catch(e){n.textContent="Could not save ("+(e&&e.code||"error")+")."}}
+async function adUser(id,k){const db=LK.db,ref=db.doc("lockusers/"+id),n=$("adnote");try{const cur=LK.ovs.find(o=>o.id===id),d=Math.max(1,+$("adudays").value||30);
+ if(k==="rm")await ref.delete();else if(k==="open")await ref.set({mode:"open",from:null,until:null,updatedAt:lkIso(lkNow())});else if(k==="lock")await ref.set({mode:"locked",from:null,until:null,updatedAt:lkIso(lkNow())});
+ else if(k==="ext"){const base=Math.max(lkNow(),Date.parse(cur&&cur.until)||0);await ref.set({mode:"period",from:(cur&&cur.from)||null,until:lkIso(base+d*864e5),updatedAt:lkIso(lkNow())})}
+ else if(k==="edit"){LK.sel={id,name:LK.names[id]||"Someone"};$("adsel").textContent="Editing: "+LK.sel.name;$("adufrom").value=cur&&cur.from?lkLocal(Date.parse(cur.from)):"";$("adutill").value=cur&&cur.until?lkLocal(Date.parse(cur.until)):""}}catch(e){n.textContent="Could not save ("+(e&&e.code||"error")+")."}}
+async function adminInit(){const tabs=document.querySelector(".tabs"),b=document.createElement("button");b.dataset.tab="tad";b.textContent="Admin";b.onclick=()=>tab("tad");tabs.appendChild(b);
+ const db=LK.db;if(!db){$("adnote").textContent="Shared data is unavailable in this view, so lock settings cannot be saved.";return}
+ try{const ps=await db.doc("lockadmin/pin").get();LK.pin=ps.exists?ps.data():null;LK.pinOK=!LK.pin}catch(_){}
+ db.doc("lockcfg/main").onSnapshot(s=>{LK.cfg=s.exists?s.data():null;adminRender()},()=>{});
+ db.collection("lockusers").onSnapshot(q=>{LK.ovs=q.docs.map(d=>({id:d.id,...d.data()}));adminRender()},()=>{});
+ $("adsave").onclick=()=>adSetCfg($("admode").value);
+ $("adlock").onclick=()=>adSetCfg("locked");
+ $("adopen").onclick=()=>adSetCfg("period",(LK.cfg&&LK.cfg.days)||30,true);
+ $("adfree").onclick=()=>adSetCfg("open");
+ $("adsrch").oninput=async()=>{const q=$("adsrch").value.trim(),R=$("adres");R.textContent="";if(!q||!LK.user)return;const hits=await LK.user.search(q);
+  hits.forEach(h=>{const row=document.createElement("div");row.className="cand";const s=document.createElement("span");s.textContent=h.name+(h.guest?" (guest)":"");row.appendChild(s);
+   const x=document.createElement("button");x.textContent="Select";x.onclick=()=>{LK.sel={id:h.id,name:h.name};$("adsel").textContent="Selected: "+h.name;$("adsrch").value="";R.textContent=""};row.appendChild(x);R.appendChild(row)})};
+ $("adadd").onclick=async()=>{if(!LK.sel){$("adnote").textContent="Search and select a person first.";return}const r=lkRange($("adufrom").value,$("adutill").value,$("adudays").value);if(!r){$("adnote").textContent="The end date must be after the start date.";return}
+  try{await db.doc("lockusers/"+LK.sel.id).set({mode:"period",from:r.from,until:r.until,updatedAt:lkIso(lkNow())});$("adnote").textContent="Saved access for "+LK.sel.name+".";LK.sel=null;$("adsel").textContent="No one selected.";$("adufrom").value="";$("adutill").value=""}catch(e){$("adnote").textContent="Could not save ("+(e&&e.code||"error")+")."}};
+ $("adgo").onclick=async()=>{const h=await lkSha(LK.pin.salt+$("adpin0").value);if(h===LK.pin.hash){LK.pinOK=true;$("adpin0").value="";adminRender()}else $("adgn").textContent="That PIN is not correct."};
+ $("adpinset").onclick=async()=>{const p=$("adpin").value;if(p.length<4){$("adpinst").textContent="Use at least 4 characters.";return}const salt=lkIso(lkNow())+Math.random().toString(36).slice(2),hash=await lkSha(salt+p);
+  try{await db.doc("lockadmin/pin").set({salt,hash});LK.pin={salt,hash};LK.pinOK=true;$("adpin").value="";adminRender()}catch(e){$("adpinst").textContent="Could not save the PIN."}};
+ $("adpinclr").onclick=async()=>{try{await db.doc("lockadmin/pin").delete();LK.pin=null;LK.pinOK=true;adminRender()}catch(e){}};
+ adminRender()}
+(async function lkInit(){
+ if(!LOCKON){if($("lkw"))$("lkw").hidden=true;return}
+ try{lkApply();setInterval(lkApply,30000);$("lkr").onclick=lkRefresh;
+  const c=window.claude;if(!c||!c.use){LK.fail=true;LK.ready=true;lkApply();return}
+  const[user,db]=await Promise.all([c.use("user"),c.use("db")]);LK.user=user;LK.db=db;LK.admin=user?await user.isOwner():false;LK.id=user?await user.id():null;
+  if(LK.admin){LK.ready=true;lkApply();await adminInit();return}
+  if(!db){LK.fail=true;LK.ready=true;lkApply();return}
+  LK.need=LK.id?2:1;const done=()=>{if(++LK.got>=LK.need){LK.ready=true;lkApply()}};let g1=false,g2=false;
+  db.doc("lockcfg/main").onSnapshot(s=>{LK.cfg=s.exists?s.data():null;if(!g1){g1=true;done()}else lkApply()},()=>{LK.fail=true;LK.ready=true;lkApply()});
+  if(LK.id)db.doc("lockusers/"+LK.id).onSnapshot(s=>{LK.ov=s.exists?s.data():null;if(!g2){g2=true;done()}else lkApply()},()=>{if(!g2){g2=true;done()}});
+  setTimeout(()=>{if(!LK.ready){LK.fail=true;LK.ready=true;lkApply()}},10000)}catch(_){LK.fail=true;LK.ready=true;try{lkApply()}catch(__){}}})();
+((P)=>P.forEach(([a,b])=>FRD.set(a,b)))([["Checking access…","Vérification de l'accès…"],["Access check unavailable","Vérification de l'accès impossible"],["Open this page from its shared link in Claude and sign in. If you already did, press Check again.","Ouvrez cette page à partir de son lien partagé dans Claude et connectez-vous. Si c'est déjà fait, appuyez sur Revérifier."],["Your access period has ended","Votre période d'accès est terminée"],["Access is locked","L'accès est verrouillé"],["Please contact the administrator to reopen your access.","Veuillez communiquer avec l'administrateur pour rouvrir votre accès."],["Check again","Revérifier"],["Your access has not started yet","Votre accès n'a pas encore commencé"]]);
+FRX.unshift([/^Your access starts on (.+?)\.( .*)?$/,(m,d,r)=>"Votre accès commence le "+d+"."+(r?" "+(FRD.get(r.trim())||r.trim()):"")],[/^Access ends on (.+) \((\d+) days? left\)\.$/,"L'accès se termine le $1 ($2 jour(s) restant(s))."]);
 
 </script>
 </body>
